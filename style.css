@@ -250,16 +250,25 @@ main.loading:empty::after {
 
 .card h2 {
   flex: 1;
+  min-width: 0;
   margin: 0;
   font-size: 18px;
   font-weight: 600;
+}
+
+/* Badge de resultado e ações opcionais do card (ex.: compartilhar) */
+.tags {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .badge {
   flex: none;
   display: inline-flex;
   align-items: center;
-  height: 38px;
+  height: 44px;
   padding: 0 16px;
   background: var(--tone);
   border-radius: 99px;
@@ -351,32 +360,6 @@ main.loading:empty::after {
 .card.shared {
   border-color: var(--ink);
   box-shadow: 0 0 0 1px var(--ink);
-}
-
-.share {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin: 18px 0 0 auto;
-  padding: 7px 12px;
-  background: none;
-  border: 1px solid var(--line2);
-  border-radius: 8px;
-  color: var(--ink2);
-  font: inherit;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-}
-
-.share:hover {
-  border-color: var(--ink);
-  color: var(--ink);
-}
-
-.share:focus-visible {
-  outline: 2px solid var(--ink);
-  outline-offset: 2px;
 }
 
 @media (max-width: 600px) {
@@ -491,3 +474,19 @@ main.loading:empty::after {
 #more[hidden] {
   display: none;
 }
+
+/* SHARE: botão do card. A janela fica em share.css, carregada sob demanda. Para remover o recurso: apague este bloco, share.js, share.css e o bloco SHARE do index.html. */
+.story {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  background: var(--surface);
+  border: 1px solid var(--line2);
+  border-radius: 50%;
+  color: var(--ink);
+  cursor: pointer;
+}
+/* SHARE: fim */

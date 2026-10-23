@@ -84,6 +84,40 @@
 
   <button id="more" type="button" hidden></button>
 
+  <!-- SHARE: início. Botão de compartilhar em cada card; a janela (share.js e share.css) só é baixada no primeiro clique.
+       Para remover o recurso: apague este bloco SHARE, share.js, share.css e o bloco SHARE do style.css. -->
+  <script>
+    (() => {
+      const shareIcon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3m-4 4 4-4 4 4M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>';
+
+      // Hook read by createCardHTML: adds the share button next to the badge
+      self.cardExtra = item => `<button type="button" class="story" aria-label="Compartilhar checagem de ${labels.n[item.n]} como imagem">${shareIcon}</button>`;
+
+      // Resolves when the element loads; on a network error it is removed so the next click retries
+      const load = (tag, attrs) => new Promise((resolve, reject) => {
+        const el = Object.assign(document.createElement(tag), attrs);
+        el.onload = resolve;
+        el.onerror = () => {
+          el.remove();
+          reject();
+        };
+        document.head.append(el);
+      });
+
+      let loading;
+      document.addEventListener('click', e => {
+        const button = e.target.closest('.card .story');
+        if (!button) return;
+        loading = loading || Promise.all([
+          load('link', { rel: 'stylesheet', href: '/share.css' }),
+          load('script', { src: '/share.js' }),
+        ]);
+        loading.then(() => self.openShare && self.openShare(button), () => loading = null);
+      });
+    })();
+  </script>
+  <!-- SHARE: fim -->
+
   <script>
     const labels = {
       // name
@@ -136,7 +170,10 @@
         <header>
           <img src="/${labels.i[item.n]}" alt="" width="56" height="56" decoding="async" loading="lazy">
           <h2>${labels.n[item.n]}</h2>
-          <span class="badge" data-c="${item.c}">${labels.c[item.c] || '?'}</span>
+          <div class="tags">
+            <span class="badge" data-c="${item.c}">${labels.c[item.c] || '?'}</span>
+            ${self.cardExtra ? cardExtra(item) : ''}
+          </div>
         </header>
         <span class="label">Disse que:</span>
         <blockquote class="said">
@@ -144,11 +181,7 @@
         </blockquote>
         <span class="label">Verificação:</span>
         <p>${escapeHTML(item.v)}</p>
-        ${createSourcesHTML(item.s)}
-        <button class="share" type="button">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3m0 0L7 8m5-5 5 5M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>
-          <span>Compartilhar</span>
-        </button>`;
+        ${createSourcesHTML(item.s)}`;
       el.addEventListener('animationend', () => el.classList.remove('new'), { once: true });
       return el;
     }
@@ -189,7 +222,6 @@
         }
         // The index in posts.json is the share link's id, and it shifts when a post is removed
         el.id = `f${i}`;
-        el.querySelector('.share').dataset.index = i;
         next.set(key, el);
         list.push(el);
       }
@@ -301,28 +333,6 @@
 
     createFilterGroup(document.getElementById('filterCandidato'), labels.n, 'data-f', document.querySelector('main'));
     createFilterGroup(document.getElementById('filterVeredito'), labels.c, 'data-v', document.querySelector('main'));
-
-    document.addEventListener('click', async (e) => {
-      const btn = e.target.closest('.share');
-      const item = btn && currentPosts[btn.dataset.index];
-      if (!item) return;
-
-      const title = `Veja se ${labels.n[item.n]} falou a verdade`;
-      const text = `${labels.n[item.n]} disse que: "${item.t}"\n\nSerá que é verdade? Veja a checagem:`;
-      const url = `${location.origin}/#f${btn.dataset.index}`;
-
-      if (navigator.share) {
-        navigator.share({ title, text, url }).catch(() => {});
-        return;
-      }
-
-      try {
-        await navigator.clipboard.writeText(`${text}\n${url}`);
-        const label = btn.querySelector('span');
-        label.textContent = 'Copiado!';
-        setTimeout(() => label.textContent = 'Compartilhar', 2000);
-      } catch {}
-    });
 
     more.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
     window.addEventListener('scroll', () => {
