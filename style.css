@@ -110,6 +110,59 @@ h1 {
   color: var(--muted);
 }
 
+/* Filtros por candidato e por veredito (issue #19) */
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  margin-bottom: 20px;
+}
+
+.filter-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.filter-group button {
+  padding: 6px 12px;
+  background: var(--surface);
+  border: 1px solid var(--line2);
+  border-radius: 99px;
+  color: var(--ink2);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.filter-group button:hover {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+
+.filter-group button:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+.filter-group button[aria-pressed="true"] {
+  background: var(--inv-bg);
+  border-color: var(--inv-bg);
+  color: var(--inv-fg);
+}
+
+main[data-f="1"] .card:not([data-n="1"]),
+main[data-f="2"] .card:not([data-n="2"]) {
+  display: none;
+}
+
+main[data-v="1"] .card:not([data-c="1"]),
+main[data-v="2"] .card:not([data-c="2"]),
+main[data-v="3"] .card:not([data-c="3"]) {
+  display: none;
+}
+
 main:empty::after {
   content: 'Nada por aqui ainda... verifique novamente daqui alguns minutos.';
   color: var(--muted);
@@ -332,6 +385,16 @@ main.loading:empty::after {
 @media (max-width: 600px) {
   .layout {
     padding: 20px 20px 40px;
+  }
+
+  .filters {
+    gap: 8px 12px;
+    margin-bottom: 16px;
+  }
+
+  .filter-group button {
+    padding: 5px 10px;
+    font-size: 12px;
   }
 
   .top {

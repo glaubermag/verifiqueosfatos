@@ -57,6 +57,11 @@
       </button>
     </header>
 
+    <div class="filters" role="group" aria-label="Filtrar checagens">
+      <div class="filter-group" id="filterCandidato" role="group" aria-label="Filtrar por candidato"></div>
+      <div class="filter-group" id="filterVeredito" role="group" aria-label="Filtrar por veredito"></div>
+    </div>
+
     <main class="loading"></main>
 
     <footer class="foot">
@@ -110,7 +115,7 @@
 
     function createCardHTML(item, index) {
       return `
-        <article class="card" id="f${index}">
+        <article class="card" id="f${index}" data-n="${item.n}" data-c="${item.c}">
           <header>
             <img src="/${labels.i[item.n]}" alt="" width="56" height="56" decoding="async" loading="lazy">
             <h2>${labels.n[item.n]}</h2>
@@ -248,6 +253,37 @@
         localStorage.setItem('theme', dark ? 'dark' : 'light');
       } catch {}
     };
+
+    // Filtro por candidato e por veredito: botões gerados a partir de labels.n/labels.c,
+    // marcam data-f/data-v no <main> e o CSS (não re-renderiza nenhum card) esconde o resto
+    function createFilterGroup(container, map, attr, target) {
+      const setPressed = (btn) => {
+        container.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', 'false'));
+        btn.setAttribute('aria-pressed', 'true');
+      };
+
+      const makeButton = (value, label, pressed) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = label;
+        btn.setAttribute('aria-pressed', String(pressed));
+        btn.onclick = () => {
+          setPressed(btn);
+          if (value) {
+            target.setAttribute(attr, value);
+          } else {
+            target.removeAttribute(attr);
+          }
+        };
+        return btn;
+      };
+
+      container.appendChild(makeButton('', 'Todos', true));
+      Object.entries(map).forEach(([value, label]) => container.appendChild(makeButton(value, label, false)));
+    }
+
+    createFilterGroup(document.getElementById('filterCandidato'), labels.n, 'data-f', document.querySelector('main'));
+    createFilterGroup(document.getElementById('filterVeredito'), labels.c, 'data-v', document.querySelector('main'));
 
     document.addEventListener('click', async (e) => {
       const btn = e.target.closest('.share');
